@@ -35,5 +35,11 @@
     <ClInclude Include="MailContent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hQueueType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QItemType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -141,9 +141,10 @@ public:
 		if (!IsEmpty())  {
 			int front = (m_iFront + 1) % m_nMaxQueue;
 			while (true) {
-				cout << m_pItems[front] << ' ';
+				cout << m_pItems[front];
 				if (front == m_iRear) break;
 				front = (front + 1) % m_nMaxQueue;
+				cout << " - ";
 			}
 			cout << endl;
 		}

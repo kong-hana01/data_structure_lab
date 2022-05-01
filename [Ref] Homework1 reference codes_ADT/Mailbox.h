@@ -4,12 +4,12 @@
 #include <list>
 #include "MailContent.h"
 #include <iostream>
-
+template<typename T>
 class User {
 private:
 	std::string name;
 	std::string mailAddress;
-	MailContent* receiveMailList;
+	T* receiveMailList;
 	int maxLength;
 	int length;
 
@@ -50,7 +50,7 @@ public:
 	}
 
 	User(int maxMailBox) {
-		name = "";
+		name = "√÷«—∫Û";
 		mailAddress = "";
 		receiveMailList = new MailContent[maxMailBox];
 		maxLength = maxMailBox;
@@ -120,10 +120,8 @@ public:
 	}
 
 	void DisplayAllMail() {
-		std::cout << length;
 		for (int i = 0; i < length; i++) {
 			receiveMailList[i].DisplayMailOnScreen();
-			std::cout << length;
 		}
 	}
 
@@ -141,7 +139,6 @@ public:
 			case MailContent::GREATER:
 				start++;
 				m_CurPointer = m_CurPointer < mid+1? mid+1 : m_CurPointer;
-				std::cout << m_CurPointer;
 				break;
 			case MailContent::EQUAL:
 				found = true;

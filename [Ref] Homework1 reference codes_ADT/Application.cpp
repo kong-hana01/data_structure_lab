@@ -31,6 +31,12 @@ void Application::Run()
 		case 7:
 			WriteDataToFile();
 			break;
+		case 8:
+			DisplayRecentAddress();
+			break;
+		case 9:
+			GetNewAddress();
+			break;
 		case 0:
 			return;
 		default:
@@ -54,6 +60,8 @@ int Application::GetCommand()
 	cout << "\t   5 : delete mails in the given time interval" << endl;
 	cout << "\t   6 : load list data from a file." << endl;
 	cout << "\t   7 : save list data into a file." << endl;
+	cout << "\t   8 : display recent mails" << endl;
+	cout << "\t   9 : Add New Mail Address." << endl;
 	cout << "\t   0 : Quit" << endl; 
 
 	cout << endl << "\t Choose a Command--> ";
@@ -74,8 +82,17 @@ int Application::AddMail()
 	int isAdd = MailBox.addReceiveMail(mail);
 	if (!isAdd) return 0;
 
+	QItemType QItem;
+	QItem.SetName(MailBox.getName());
+	QItem.SetAddress(mail.getSenderMailAddress());
+	UpdateRecentAddress(QItem);
+
 	// [작성] 현재 list 출력
+	cout << "All Mails" << endl;
 	DisplayAllMail();
+
+	cout << endl << "Recent Mails" << endl;
+	DisplayRecentAddress();
 	return 1;
 }
 
@@ -92,7 +109,7 @@ void Application::DisplayAllMail()
 	//while (location != -1 && location < MailBox.GetLength()) {
 	//	mail.DisplayMailOnScreen();
 	//	cout << '\n';
-	//	location = MailBox.GetNextItem(mail);
+	//	location = MailBox.GetNextItem(mzail);
 	//}
 	
 }
@@ -239,4 +256,22 @@ void Application::DeleteMailsInTimeInterval() {
 	cout << "끝 시간을 입력해주세요(YYYYMMDDTTMMSS): \n";
 	cin >> end;
 	MailBox.MailBoxDeleteMailsInTimeInterval(start, end);
+}
+
+
+int Application::UpdateRecentAddress(QItemType Item) {
+	hQueue.DeleteItem(Item);
+	hQueue.EnQueue(Item);
+	return 1;
+}
+
+void Application::DisplayRecentAddress() {
+	hQueue.DisplayAllItems();
+}
+
+int Application::GetNewAddress() {
+	QItemType QItem;
+	QItem.SetName(MailBox.getName());
+	QItem.SetAddressFromKB();
+	return UpdateRecentAddress(QItem);
 }
