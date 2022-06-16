@@ -34,4 +34,35 @@ private:
 	DoublyNodeType<T>* m_pCurPointer;
 };
 
+
+
+template <typename T>
+bool DoublyIterator<T>::NotNull() {
+	return m_pCurPointer;
+}
+
+
+template <typename T>
+bool DoublyIterator<T>::NextNotNull() {
+	return m_pCurPointer && m_pCurPointer->next;
+}
+
+template <typename T>
+T DoublyIterator<T>::First() {
+	return m_List->next;
+}
+
+template <typename T>
+T DoublyIterator<T>::Next() {
+	if (NotNull()) 	return m_pCurPointer->next;
+
+}
+
+template <typename T>
+DoublyNodeType<T> DoublyIterator<T>::GetCurrentNode() {
+
+
+}
+
+
 #endif _DOUBLYITERATOR_H
