@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Mailbox.h"
+#include "SortedLinkedList.h"
 #include "hQueueType.h"
 #include <fstream>
 
@@ -11,14 +11,17 @@ using namespace std;
 class Application {
 	enum TYPE {SEND, RECEIVE};
 private:
-	User<MailContent> MailBox;
-	hQueueType<QItemType> hQueue;
+	SortedLinkedList<MailContent> m_mailBox;
+	SortedLinkedList<AddrItemType> m_addressBook;
+	SortedLinkedList<MailContent> m_trashBin;
+	SortedLinkedList<MailContent> tempList;
+	hQueueType<QItemType> m_recentMailBox;
 	ifstream m_InFile;
 	ofstream m_OutFile;
 	int m_Command;
 
 public:
-	Application() : m_Command(0), MailBox(MAX_MAIL_BOX), hQueue(MAX_MAIL_BOX/2) {}
+	Application() : m_Command(0), m_mailBox(), m_addressBook(), m_trashBin(), tempList(), m_recentMailBox(MAX_MAIL_BOX/2) {}
 	~Application() {}
 
 	void Run(); // 프로그램 시작 시 동작
@@ -47,5 +50,27 @@ public:
 
 	int GetNewAddress();
 
-	//void DisplayMails(std::list<MailContent> mailList, TYPE type);
+	int AddAddress(QItemType QItem);
+
+	AddrItemType SearchAddress();
+
+	int DeleteAddress();
+
+	void DisplayAllAddress();
+
+	int AddToTrashBin(MailContent m);
+
+	int DeleteFromTrashBin(MailContent m);
+
+	int AddToMailBox(MailContent m);
+
+	int DeleteFromMailBox(MailContent m);
+
+	int DeleteMail();
+
+	int RestoreMail();
+
+	void DisplayAllTrashBin();
+
+//	DisplayByName();
 };

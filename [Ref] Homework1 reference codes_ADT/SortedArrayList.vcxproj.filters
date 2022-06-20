@@ -24,12 +24,15 @@
     <ClCompile Include="MailContent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AddrItemType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mailbox.h">
+    <ClInclude Include="SortedLinkedList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MailContent.h">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="QItemType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AddrItemType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

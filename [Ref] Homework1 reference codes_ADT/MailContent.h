@@ -7,28 +7,47 @@
 #include <fstream>
 
 class MailContent {
-private:
+public:
+	std::string name;
 	std::string title;
 	std::string senderMailAddress;
 	std::string content;
 	std::string label;
 	std::string recieveDate;
+	MailContent* next;
 
-	//bool unread;
-
-	//struct _timeb sendTime;
-
-public:
 	MailContent(){
+		name = "";
 		title = "";
 		senderMailAddress = "";
 		content = "";
 		label = "";
-		std::string recieveDate = "";
-		//unread = true;
+		recieveDate = "";
+		next = NULL;
+	}
 
-		//_ftime_s(&sendTime); // send 보낸 시간 저장
+	MailContent(const MailContent& m) {
+		name = m.name;
+		title = m.title;
+		senderMailAddress = m.senderMailAddress;
+		content = m.content;
+		label = m.label;
+		recieveDate = m.recieveDate;
+		next = m.next;
+	}
+	MailContent& operator=(const MailContent& m) {
+		name = m.name;
+		title = m.title;
+		senderMailAddress = m.senderMailAddress;
+		content = m.content;
+		label = m.label;
+		recieveDate = m.recieveDate;
+		next = m.next;
+		return *this;
+	}
 
+	bool operator==(const MailContent& m) {
+		return this->recieveDate == m.recieveDate;
 	}
 
 	void setTitle(std::string title);
@@ -40,6 +59,8 @@ public:
 	void setLabel(std::string label);
 
 	void setRecieveDate(std::string date);
+
+	void setName(std::string name);
 
 	//void setUnread(bool check);
 
@@ -60,26 +81,47 @@ public:
 		case 5:
 			std::cout << "RecieveDate: ";
 			break;
+		case 6:
+			std::cout << "Name: ";
+			break;
 		}
 		std::cin >> data;
 		std::cout << std::endl;
 	}
 
 	void setMail() {
-		std::string title, mailAddress, content, label, recieveDate;
+		std::string title, mailAddress, content, label, recieveDate, name;
+		cinMail(name, 6);
 		cinMail(title, 1);
 		cinMail(mailAddress, 2);
 		cinMail(content, 3);
 		cinMail(label, 4);
 		cinMail(recieveDate, 5);
+		
 
 		setTitle(title);
 		setSenderMailAddress(mailAddress);
 		setContent(content);
 		setLabel(label);
 		setRecieveDate(recieveDate);
+		setName(name);
 		//setUnread(check);
 	}
+
+	void setdata(MailContent& item) {
+		this->name = item.name;
+		this->title = item.title;
+		this->senderMailAddress = item.senderMailAddress;
+		this->content = item.content;
+		this->label = item.label;
+		this->recieveDate = item.recieveDate;
+		this->next = item.next;
+	}
+
+	void DisplayonName() {
+		std::cout << "\tName   : " << name << std::endl;
+	}
+
 
 	void DisplayonTitle() {
 		std::cout << "\tTitle   : " << title << std::endl;
@@ -101,12 +143,9 @@ public:
 		std::cout << "\tRecieveDate   : " << recieveDate << std::endl;
 	}
 
-	//void DisplayonUnread() {
-	//	std::cout << "\tunread   : " << unread << std::endl;
-	//}
-
 
 	void DisplayMailOnScreen() {
+		DisplayonName();
 		DisplayonTitle();
 		DisplayonSenderMailAddress();
 		DisplayonContent();
@@ -124,6 +163,7 @@ public:
 
 	std::string getRecieveDate();
 
+	std::string getName();
 
 	/*bool getUnread();
 
@@ -135,6 +175,6 @@ public:
 
 	enum RelationType { LESS, GREATER, EQUAL };
 
-	RelationType MailContent::CompareByDate(const MailContent& data);
+	RelationType MailContent::CompareTo(const MailContent& data);
 
 };

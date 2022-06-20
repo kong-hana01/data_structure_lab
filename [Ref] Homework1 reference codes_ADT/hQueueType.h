@@ -87,7 +87,7 @@ public:
 		if (!IsEmpty()) {
 			int front = (m_iFront + 1) % m_nMaxQueue;
 			bool found = false;
-			while (front != m_iRear) {
+			while (front != (m_iRear+1) % m_nMaxQueue) {
 				if (!found) {
 					if (m_pItems[front].GetAddress() == item.GetAddress()) {
 						m_pItems[front] = m_pItems[front + 1];

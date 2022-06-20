@@ -25,6 +25,11 @@ public:
 		m_mailAddress = "";
 	}
 
+	//QItemType(const QItemType& q) {
+	//	m_name = q.m_name;
+	//	m_mailAddress = q.m_mailAddress;
+	//}
+
 	~QItemType(){}
 
 

@@ -21,6 +21,9 @@ void MailContent::setRecieveDate(std::string date) {
 	this->recieveDate = date;
 }
 
+void MailContent::setName(std::string name) {
+	this->name = name;
+}
 
 //void MailContent::setUnread(bool check) {
 //	this->unread = check;
@@ -56,9 +59,13 @@ std::string MailContent::getRecieveDate() {
 	return recieveDate;
 }
 
+std::string MailContent::getName() {
+	return name;
+}
 
 int MailContent::ReadDataFromFile(std::ifstream& fin)
 {
+	fin >> name;
 	fin >> title;
 	fin >> senderMailAddress;
 	fin >> content;
@@ -74,6 +81,7 @@ int MailContent::ReadDataFromFile(std::ifstream& fin)
 
 int MailContent::WriteDataToFile(std::ofstream& fout)
 {
+	fout << name << std::endl;
 	fout << title << std::endl;
 	fout << senderMailAddress << std::endl;
 	fout << content << std::endl;
@@ -90,7 +98,7 @@ int MailContent::WriteDataToFile(std::ofstream& fout)
 
 
 
-MailContent::RelationType MailContent::CompareByDate(const MailContent& mail)
+MailContent::RelationType MailContent::CompareTo(const MailContent& mail)
 {
 	if (this->recieveDate > mail.recieveDate)
 		return GREATER;

@@ -8,6 +8,7 @@ void Application::Run()
 	{
 		m_Command = GetCommand();
 
+
 		switch(m_Command)
 		{
 		case 1:		// read a record and add to list.
@@ -17,7 +18,7 @@ void Application::Run()
 			DisplayAllMail();
 			break;
 		case 3:		// make empty list.
-			MailBox.MakeEmpty();
+			m_mailBox.MakeEmpty();
 			break;
 		case 4:		
 			FindNDisplayMail();
@@ -36,6 +37,21 @@ void Application::Run()
 			break;
 		case 9:
 			GetNewAddress();
+			break;
+		case 10:
+			SearchAddress();
+			break;
+		case 11:
+			DeleteAddress();
+			break;
+		case 12:
+			DisplayAllAddress();
+			break;
+		case 13:
+			DisplayAllTrashBin();
+			break;
+		case 14:
+			RestoreMail();
 			break;
 		case 0:
 			return;
@@ -62,8 +78,12 @@ int Application::GetCommand()
 	cout << "\t   7 : save list data into a file." << endl;
 	cout << "\t   8 : display recent mails" << endl;
 	cout << "\t   9 : Add New Mail Address." << endl;
+	cout << "\t   10 : Search Address." << endl;
+	cout << "\t   11 : Delete Address." << endl;
+	cout << "\t   12 : Display Address." << endl;
+	cout << "\t   13 : Display trash bin." << endl;
+	cout << "\t   14 : Restore Mail." << endl;
 	cout << "\t   0 : Quit" << endl; 
-
 	cout << endl << "\t Choose a Command--> ";
 	cin >> command;
 	cout << endl;
@@ -71,19 +91,20 @@ int Application::GetCommand()
 	return command;
 }
 
+//
+// 메일함
+//
 
-// Add new record into list.
 int Application::AddMail()
 {
-	// [작성] 입력받은 레코드를 리스트에 add, 리스트가 full일 경우는 add하지 않고 0을 리턴
 	MailContent mail;
 	mail.setMail();
 	//data.SetRecordFromKB(); // 메일 불러오기
-	int isAdd = MailBox.addReceiveMail(mail);
+	int isAdd = m_mailBox.addMail(mail);
 	if (!isAdd) return 0;
 
 	QItemType QItem;
-	QItem.SetName(MailBox.getName());
+	QItem.SetName(mail.getName());
 	QItem.SetAddress(mail.getSenderMailAddress());
 	UpdateRecentAddress(QItem);
 
@@ -93,29 +114,28 @@ int Application::AddMail()
 
 	cout << endl << "Recent Mails" << endl;
 	DisplayRecentAddress();
+
+	cout << endl << "All AddressBook" << endl;
+	DisplayAllAddress();
 	return 1;
 }
 
 
-// Display all records in the list on screen.
 void Application::DisplayAllMail()
 {
 	cout << "\n\tCurrent MailBox" << endl;
-	MailBox.DisplayAllMail();
+	MailContent data;
 
-	// [작성] list의 모든 데이터를 화면에 출력
-	//MailBox.ResetList();
-	//int location = MailBox.GetNextItem(mail);
-	//while (location != -1 && location < MailBox.GetLength()) {
-	//	mail.DisplayMailOnScreen();
-	//	cout << '\n';
-	//	location = MailBox.GetNextItem(mzail);
-	//}
-	
+	m_mailBox.ResetList();	// 리스트 초기화
+	// list의 모든 데이터를 화면에 출력
+	for (int i = 0; i < m_mailBox.GetLength(); i++)
+	{
+		m_mailBox.GetNextItem(data);
+		data.DisplayMailOnScreen();
+	}
 }
 
 
-// Open a file by file descriptor as an input file.
 int Application::OpenInFile(char *fileName)
 {
 	m_InFile.open(fileName);	// file open for reading.
@@ -125,7 +145,6 @@ int Application::OpenInFile(char *fileName)
 }
 
 
-// Open a file by file descriptor as an output file.
 int Application::OpenOutFile(char *fileName)
 {
 	m_OutFile.open(fileName);	// file open for writing.
@@ -134,12 +153,8 @@ int Application::OpenOutFile(char *fileName)
 	return m_OutFile.is_open();
 }
 
-
-// Open a file as a read mode, read all data on the file, and set list by the data.
 int Application::ReadDataFromFile()
-{
-	int index = 0;
-	MailContent mail;	// 읽기용 임시 변수
+{	
 	
 	char filename[FILENAMESIZE];
 	cout << "\n\tEnter Input file Name : ";
@@ -147,8 +162,20 @@ int Application::ReadDataFromFile()
 
 	// [작성] file open, open error가 발생하면 0을 리턴
 	if (!OpenInFile(filename)) return 0;
+	MailContent mail;	// 읽기용 임시 변수
 	
-	MailBox.ReadMailToFile(m_InFile);
+	m_mailBox.MakeEmpty();
+	//string temp;
+	//m_InFile >> temp;
+	//m_mailBox.setName(temp);
+	//m_InFile >> temp;
+	//m_mailBox.setMailAddress(temp);
+	while (!m_InFile.eof()) {
+		mail.ReadDataFromFile(m_InFile);
+		if (mail.getRecieveDate() != "") m_mailBox.addMail(mail);
+	}
+
+	//m_mailBox.ReadMailToFile(m_InFile);
 	m_InFile.close();	// file close
 
 	// [작성] 현재 list 출력
@@ -157,8 +184,6 @@ int Application::ReadDataFromFile()
 	return 1;
 }
 
-
-// Open a file as a write mode, and write all data into the file,
 int Application::WriteDataToFile()
 {
 	char filename[FILENAMESIZE];
@@ -167,78 +192,23 @@ int Application::WriteDataToFile()
 
 	// [작성] file open, open error가 발생하면 0을 리턴
 	if (!OpenOutFile(filename)) return 0;
+	MailContent mail;
 
+	//m_OutFile << m_mailBox.getName() << std::endl;
+	//m_OutFile << m_mailBox.getMailAddress() << std::endl;
 	// [작성] list의 모든 데이터를 파일에 쓰기
-	MailBox.WriteMailToFile(m_OutFile);
+	m_mailBox.ResetList();
+	for (int i = 0; i < m_mailBox.GetLength(); i++)
+	{
+		m_mailBox.GetNextItem(mail);
+		mail.WriteDataToFile(m_OutFile);
+	}
+	//m_mailBox.WriteMailToFile(m_OutFile);
 
 	m_OutFile.close();	// file close
 
 	return 1;
 }
-
-
-//
-//int Application::SearchItemById(){
-//	ItemType data;
-//	data.SetIdFromKB();
-//	if (m_List.Get(data)) { 
-//		data.DisplayRecordOnScreen();
-//		return 1;
-//	}
-//	return 0;
-//}
-//
-//
-//int Application::RetriveRecordByMemberName(){
-//	ItemType data;
-//	data.SetNameFromKB();
-//	if (SearchListByMemberName(data)) {
-//		data.DisplayRecordOnScreen();
-//		return 1;
-//	}
-//	return 0;
-//}
-//
-//
-//int Application::SearchListByMemberName(ItemType& inData){
-//	ItemType temp;
-//	m_List.ResetList();
-//	int cur = m_List.GetNextItem(temp);
-//	while (cur != -1 && cur < m_List.GetLength()) {
-//		if (temp.GetName().find(inData.GetName()) != -1) {
-//			inData = temp;
-//			return 1;
-//		}
-//		cur = m_List.GetNextItem(temp);
-//	}
-//	return 0;
-//}
-
-//
-//int Application::DeleteItem(){
-//	ItemType data;
-//	data.SetIdFromKB();
-//	if (m_List.Delete(data)) return 1;
-//	return 0;
-//}
-//
-//int Application::ReplaceItem(){
-//	ItemType data;
-//	data.SetRecordFromKB();
-//	if (m_List.Replace(data)) return 1;
-//	return 0;
-//}
-//
-//
-//int Application::SearchItemByBinarySearch(){
-//	ItemType data;
-//	data.SetIdFromKB();
-//	if (m_List.GetBinarySearch(data)) { 
-//		data.DisplayRecordOnScreen();
-//		return 1;
-//	}
-//	return 0;
-//}
 
 void Application::FindNDisplayMail() {
 	string start, end;
@@ -246,7 +216,17 @@ void Application::FindNDisplayMail() {
 	cin >> start;
 	cout << "끝 시간을 입력해주세요(YYYYMMDDTTMMSS): \n";
 	cin >> end;
-	MailBox.MailBoxFindNDisplayMail(start, end);
+	
+	MailContent mail;
+	m_mailBox.ResetList();	// 리스트 초기화
+	for (int i = 0; i < m_mailBox.GetLength(); i++){
+		m_mailBox.GetNextItem(mail);
+		if (mail.getRecieveDate() > end) break;
+		if (mail.getRecieveDate() >= start) {
+			mail.DisplayMailOnScreen();
+			}
+		}
+
 }
 
 void Application::DeleteMailsInTimeInterval() {
@@ -255,23 +235,181 @@ void Application::DeleteMailsInTimeInterval() {
 	cin >> start;
 	cout << "끝 시간을 입력해주세요(YYYYMMDDTTMMSS): \n";
 	cin >> end;
-	MailBox.MailBoxDeleteMailsInTimeInterval(start, end);
+	int cnt = 0, idx = m_mailBox.GetLength();
+	MailContent mail;
+	m_mailBox.ResetList();	// 리스트 초기화
+	for (int i = 0; i < m_mailBox.GetLength(); i++) {
+		m_mailBox.GetNextItem(mail);
+		if (mail.getRecieveDate() > end) break;
+		if (mail.getRecieveDate() >= start) {
+			idx = idx < i ? idx : i;
+			cnt++;
+			mail.next = NULL;
+			AddToTrashBin(mail);
+		}
+	}
+	for (int i = 0; i < cnt; i++){
+		m_mailBox.DeleteItem(idx);
+	}
 }
 
+//
+// 최근 메일함
+//
 
 int Application::UpdateRecentAddress(QItemType Item) {
-	hQueue.DeleteItem(Item);
-	hQueue.EnQueue(Item);
+	m_recentMailBox.DeleteItem(Item);
+	m_recentMailBox.EnQueue(Item);
 	return 1;
 }
 
 void Application::DisplayRecentAddress() {
-	hQueue.DisplayAllItems();
+	m_recentMailBox.DisplayAllItems();
 }
 
 int Application::GetNewAddress() {
+	DisplayRecentAddress();
+
 	QItemType QItem;
-	QItem.SetName(MailBox.getName());
+	//QItem.SetName(m_mailBox.getName());
+	QItem.SetNameFromKB();
 	QItem.SetAddressFromKB();
-	return UpdateRecentAddress(QItem);
+	
+	return AddAddress(QItem);
 }
+
+//
+// 주소록
+//
+
+int Application::AddAddress(QItemType QItem) {
+	UpdateRecentAddress(QItem);
+
+	AddrItemType AItem;	
+	AItem.setaddress(QItem.GetAddress());
+	AItem.setName(QItem.GetName());
+
+	return m_addressBook.addMail(AItem);
+}
+
+AddrItemType Application::SearchAddress() {
+	AddrItemType item;
+	string temp;
+	cout << "주소를 입력하세요." << endl;
+	cin >> temp;
+	item.setaddress(temp);
+	if (m_addressBook.Get(item)) {
+		cout << "주소가 있습니다." << endl;
+	}
+	else {
+		cout << "주소가 없습니다." << endl;
+	}
+	return item;
+}
+
+int Application::DeleteAddress() {
+	string address;
+	cout << "주소를 입력해주세요: \n";
+	cin >> address;
+
+	int cnt = 0, idx = m_addressBook.GetLength();
+	AddrItemType data;
+	m_addressBook.ResetList();	// 리스트 초기화
+	for (int i = 0; i < m_addressBook.GetLength(); i++) {
+		m_addressBook.GetNextItem(data);
+		if (data.getaddress() == address) {
+			idx = idx < i ? idx : i;
+			cnt++;
+		}
+	}
+	AddrItemType mail;
+	for (int i = 0; i < cnt; i++)
+		m_addressBook.DeleteItem(idx);
+	return 1;
+}
+
+void Application::DisplayAllAddress() {
+	cout << "\n\tCurrent Address" << endl;
+	AddrItemType data;
+
+	m_addressBook.ResetList();	// 리스트 초기화
+	// list의 모든 데이터를 화면에 출력
+	for (int i = 0; i < m_addressBook.GetLength(); i++) {
+		m_addressBook.GetNextItem(data);
+		data.DisplayMailOnScreen();
+	}
+}
+
+//
+// 휴지통
+//
+
+int Application::AddToTrashBin(MailContent m) {
+	return m_trashBin.addMail(m);
+}
+
+int Application::DeleteFromTrashBin(MailContent m) {
+	int cnt = 0, idx = m_trashBin.GetLength();
+	MailContent data;
+	m_trashBin.ResetList();	// 리스트 초기화
+	for (int i = 0; i < m_trashBin.GetLength(); i++) {
+		m_trashBin.GetNextItem(data);
+		if (data == m) {
+			AddToMailBox(data);
+			m_trashBin.DeleteItem(i);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+int Application::AddToMailBox(MailContent m) {
+	return m_mailBox.addMail(m);
+}
+
+int Application::DeleteFromMailBox(MailContent m) {
+	int cnt = 0, idx = m_mailBox.GetLength();
+	MailContent data;
+	m_mailBox.ResetList();	// 리스트 초기화
+	for (int i = 0; i < m_mailBox.GetLength(); i++) {
+		m_mailBox.GetNextItem(data);
+		if (data == m) {
+			AddToTrashBin(data);
+			m_mailBox.DeleteItem(idx);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int Application::DeleteMail() {
+	MailContent mail;
+	mail.setMail();
+	return DeleteFromMailBox(mail);
+}
+
+
+int Application::RestoreMail() {
+	MailContent mail;
+	mail.setMail();
+	return DeleteFromTrashBin(mail);
+}
+
+void Application::DisplayAllTrashBin() {
+	cout << "\n\tCurrent Address" << endl;
+	MailContent data;
+
+	m_trashBin.ResetList();	// 리스트 초기화
+	// list의 모든 데이터를 화면에 출력
+	for (int i = 0; i < m_trashBin.GetLength(); i++) {
+		m_trashBin.GetNextItem(data);
+		data.DisplayMailOnScreen();
+	}
+}
+
+
+
+//int Application::DisplayByName() {
+//	MailContent mail;
+//}

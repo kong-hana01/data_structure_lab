@@ -77,14 +77,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AddrItemType.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="MailContent.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AddrItemType.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="QItemType.h" />
-    <ClInclude Include="Mailbox.h" />
+    <ClInclude Include="SortedLinkedList.h" />
     <ClInclude Include="MailContent.h" />
     <ClInclude Include="hQueueType.h" />
   </ItemGroup>
